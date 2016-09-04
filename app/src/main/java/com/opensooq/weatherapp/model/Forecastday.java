@@ -2,13 +2,14 @@ package com.opensooq.weatherapp.model;
 
 import com.google.gson.annotations.SerializedName;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Created by Omar AlTamimi on 9/1/2016.
  */
-public class Forecastday {
+public class ForecastDay implements Serializable{
     @SerializedName("date")
     private String date;
     @SerializedName("day")

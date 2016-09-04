@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+   android:layout_width="match_parent"
+    android:layout_height="250dp">
+<RelativeLayout
+
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+  <ImageView
+      android:id="@+id/bg_img"
+
+      android:layout_width="match_parent"
+      android:layout_height="match_parent" />
+    <ImageView
+        android:id="@+id/condition_ic"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:layout_alignParentRight="true"
+        android:layout_margin="16dp"/>
+    <TextView
+        android:id="@+id/condition_txt"
+        android:textColor="#fff"
+
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/condition_ic"
+        android:text="condition"
+        android:layout_alignParentRight="true"
+        android:layout_marginRight="26dp"/>
+
+
+    <LinearLayout
+        android:id="@+id/box"
+        android:layout_margin="20dp"
+        android:orientation="vertical"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+        <TextView
+            android:id="@+id/date"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:textColor="#fff"
+            android:layout_marginTop="16dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="20dp"
+            android:text="datesdas dsad"/>
+        <TextView
+            android:id="@+id/max_temp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="70sp"
+            android:textStyle="bold"
+            android:textColor="#ffffff"
+            android:layout_marginLeft="16dp"
+            android:text="17"/>
+        <TextView
+            android:id="@+id/min_temp"
+            android:textStyle="bold"
+            android:layout_marginLeft="22dp"
+            android:textColor="#ffffff"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="45sp"
+            android:layout_below="@id/max_temp"
+            android:text="8"/>
+    </LinearLayout>
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/countryName"
+        android:text="country"
+        android:textSize="32sp"
+        android:layout_below="@id/condition_txt"
+        android:layout_alignParentRight="true"
+        android:layout_margin="16dp"
+
+        android:textColor="#fff"/>
+
+
+</RelativeLayout>
+</android.support.v7.widget.CardView>

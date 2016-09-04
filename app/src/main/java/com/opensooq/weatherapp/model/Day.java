@@ -2,10 +2,12 @@ package com.opensooq.weatherapp.model;
 
 import com.google.gson.annotations.SerializedName;
 
+import java.io.Serializable;
+
 /**
  * Created by Omar AlTamimi on 9/1/2016.
  */
-public class Day {
+public class Day implements Serializable{
     @SerializedName("maxtemp_c")
     private double maxtempC;
     @SerializedName("mintemp_c")

@@ -2,14 +2,16 @@ package com.opensooq.weatherapp.model;
 
 import com.google.gson.annotations.SerializedName;
 
+import java.io.Serializable;
+
 /**
  * Created by Omar AlTamimi on 9/1/2016.
  */
-public class Current {
+public class Current implements Serializable {
     @SerializedName("condition")
     private Condition condition;
     @SerializedName("temp_c")
-    private int tempC;
+    private double tempC;
 
     public Condition getCondition() {
         return condition;
@@ -19,11 +21,11 @@ public class Current {
         this.condition = condition;
     }
 
-    public int getTempC() {
+    public double getTempC() {
         return tempC;
     }
 
-    public void setTempC(int tempC) {
+    public void setTempC(double tempC) {
         this.tempC = tempC;
     }
 }

@@ -2,10 +2,12 @@ package com.opensooq.weatherapp.model;
 
 import com.google.gson.annotations.SerializedName;
 
+import java.io.Serializable;
+
 /**
  * Created by Omar AlTamimi on 9/1/2016.
  */
-public class Hour {
+public class Hour implements Serializable {
     @SerializedName("condition")
     private Condition condition;
     @SerializedName("time")
