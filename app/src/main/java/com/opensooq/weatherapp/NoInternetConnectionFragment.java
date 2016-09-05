@@ -1,7 +1,6 @@
 package com.opensooq.weatherapp;
 
 import android.content.Context;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -15,7 +14,7 @@ import com.squareup.picasso.Picasso;
 
 
 public class NoInternetConnectionFragment extends Fragment {
-private ImageView imageViewSad;
+    private ImageView imageViewSad;
     private Button retryButton;
     private onRefreshButtonListener mListener;
 

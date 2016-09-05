@@ -2,9 +2,8 @@ package com.opensooq.weatherapp;
 
 import android.content.Intent;
 import android.os.AsyncTask;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
+import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -15,27 +14,26 @@ import com.opensooq.weatherapp.Activities.CityListActivity;
 import com.opensooq.weatherapp.api.ApiClient;
 import com.opensooq.weatherapp.api.ApiInterface;
 import com.opensooq.weatherapp.common.Const;
-import com.opensooq.weatherapp.common.TinySharedPreferences;
+import com.opensooq.weatherapp.common.Pref;
 import com.opensooq.weatherapp.model.Weather;
 
 import java.io.IOException;
+
 import retrofit2.Call;
 import retrofit2.Response;
 
 public class MainActivity extends AppCompatActivity implements NoInternetConnectionFragment.onRefreshButtonListener ,WeatherFragment.OnItemClickedListener{
+    String cityName;
+    WeatherFragment fragment;
     private ApiInterface apiService;
     private Weather weather;
     private FrameLayout container;
     private ProgressBar mProgressBar;
-    private TinySharedPreferences tinySharedPreferences;
-    String cityName;
-    WeatherFragment fragment;
-
 
     @Override
     protected void onResume() {
         super.onResume();
-        if(cityName!=tinySharedPreferences.getLastSelcted(this))
+        if (cityName != Pref.with(this).getLastSelected())
         getData();
     }
 
@@ -46,11 +44,11 @@ public class MainActivity extends AppCompatActivity implements NoInternetConnect
         apiService = ApiClient.getClient().create(ApiInterface.class);
         container = (FrameLayout) findViewById(R.id.fragmentContainer);
         mProgressBar = (ProgressBar) findViewById(R.id.loading_progress);
-   tinySharedPreferences = new TinySharedPreferences();
+
         getData();
     }
 public void getData(){
-    new WeatherAsync().execute(tinySharedPreferences.getLastSelcted(this));
+    new WeatherAsync().execute(tinySharedPreferences.getLastSelected(this));
 
 }
     @Override
@@ -92,6 +90,13 @@ fragment =  WeatherFragment.newInstance(weather,Const.HOURLY,position, cityName)
         getData();
     }
 
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        getData();
+
+    }
+
     class WeatherAsync extends AsyncTask<String, Void, Void> {
 
         @Override
@@ -130,12 +135,5 @@ fragment =  WeatherFragment.newInstance(weather,Const.HOURLY,position, cityName)
                 getSupportFragmentManager().beginTransaction().replace(R.id.fragmentContainer,fragment).commit();
             }
         }
-    }
-
-    @Override
-    public void onBackPressed() {
-        super.onBackPressed();
-        getData();
-
     }
 }

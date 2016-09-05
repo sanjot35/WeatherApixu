@@ -3,14 +3,12 @@ package com.opensooq.weatherapp.Activities;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
+import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
-
 import android.util.Log;
 import android.view.ActionMode;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -22,14 +20,11 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.opensooq.weatherapp.MainActivity;
-import com.opensooq.weatherapp.NoInternetConnectionFragment;
 import com.opensooq.weatherapp.R;
-import com.opensooq.weatherapp.WeatherFragment;
 import com.opensooq.weatherapp.api.ApiClient;
 import com.opensooq.weatherapp.api.ApiInterface;
 import com.opensooq.weatherapp.common.Const;
-import com.opensooq.weatherapp.common.TinySharedPreferences;
+import com.opensooq.weatherapp.common.Pref;
 import com.opensooq.weatherapp.model.Weather;
 
 import java.io.IOException;
@@ -44,7 +39,7 @@ public class CityListActivity extends AppCompatActivity {
     private int currentSelection;
     private ApiInterface apiService;
     private Weather weather;
-    private TinySharedPreferences tinySharedPreferences;
+    private Pref tinySharedPreferences;
     private FloatingActionButton floatingActionButton;
     private ProgressBar progressBar;
     private TextView jokeMessage;
@@ -52,7 +47,7 @@ public class CityListActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_city_list);
-        tinySharedPreferences = new TinySharedPreferences();
+        tinySharedPreferences = new Pref();
         apiService = ApiClient.getClient().create(ApiInterface.class);
         getSupportActionBar().setHomeButtonEnabled(true);
         listView = (ListView) findViewById(R.id.list_cities);

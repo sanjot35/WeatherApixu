@@ -46,6 +46,17 @@ public class WeatherFragment extends Fragment {
         // Required empty public constructor
     }
 
+    public static WeatherFragment newInstance(Weather weather, int type, int i, String cityName) {
+        WeatherFragment fragment = new WeatherFragment();
+        Bundle args = new Bundle();
+        args.putSerializable(WEATHER, weather);
+        args.putInt(TYPE, type);
+        args.putInt(POSITION, i);
+        args.putString(COUNTRY_NAME, cityName);
+        fragment.setArguments(args);
+        return fragment;
+    }
+
     public int getType() {
         return mType;
     }
@@ -60,17 +71,6 @@ public class WeatherFragment extends Fragment {
 
     public void setSelectedDay(Day selectedDay) {
         this.selectedDay = selectedDay;
-    }
-
-    public static WeatherFragment newInstance(Weather weather, int type, int i, String cityName) {
-        WeatherFragment fragment = new WeatherFragment();
-        Bundle args = new Bundle();
-        args.putSerializable(WEATHER, weather);
-        args.putInt(TYPE, type);
-        args.putInt(POSITION,i);
-         args.putString(COUNTRY_NAME,cityName);
-        fragment.setArguments(args);
-        return fragment;
     }
 
     @Override
@@ -145,16 +145,16 @@ public class WeatherFragment extends Fragment {
         });
         if (mType == Const.DAILY) {
             Picasso.with(getContext()).load("http://".concat(weather.getCurrent().getCondition().getIconLink().substring(2, weather.getCurrent().getCondition().getIconLink().length()))).into(icCondition);
-            dateTxt.setText("today");
+            dateTxt.setText(R.string.today);
             conditionTxt.setText(weather.getCurrent().getCondition().getConditionText());
-            MaxTemp.setText(weather.getForecast().getForecastDay().get(0).getDay().getMaxtempC() + "" + "\u00B0");
-            MinTemp.setText(weather.getForecast().getForecastDay().get(0).getDay().getMintempC() + "" + "\u00B0");
+            MaxTemp.setText(String.format("%s°", weather.getForecast().getForecastDay().get(0).getDay().getMaxtempC()));
+            MinTemp.setText(String.format("%s°", weather.getForecast().getForecastDay().get(0).getDay().getMintempC()));
         } else {
             Picasso.with(getContext()).load("http://".concat(getSelectedDay().getCondition().getIconLink().substring(2, getSelectedDay().getCondition().getIconLink().length()))).into(icCondition);
-            dateTxt.setText(Util.ConvertDateToDay(weather.getForecast().getForecastDay().get(mPosition).getDate()) + "");
+            dateTxt.setText(String.format("%s", Util.ConvertDateToDay(weather.getForecast().getForecastDay().get(mPosition).getDate())));
             conditionTxt.setText(getSelectedDay().getCondition().getConditionText());
-            MaxTemp.setText(getSelectedDay().getMaxtempC() + "" + "\u00B0");
-            MinTemp.setText(getSelectedDay().getMintempC() + "" + "\u00B0");
+            MaxTemp.setText(String.format("%s°", getSelectedDay().getMaxtempC()));
+            MinTemp.setText(String.format("%s°", getSelectedDay().getMintempC()));
         }
 
     }
