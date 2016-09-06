@@ -9,22 +9,37 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
 
-public class NoInternetConnectionFragment extends Fragment {
-    private ImageView imageViewSad;
-    private Button retryButton;
+public class ErrorMessageFragment extends Fragment {
+    private static final String MESSAGE = "message";
+    @BindView(R.id.sad_img)
+    ImageView imageViewSad;
+    @BindView(R.id.retry)
+    Button retryButton;
+    @BindView(R.id.error_txt)
+    TextView errorTextView;
+    private String message;
+
+    /*
+
+    imageViewSad = (ImageView) view.findViewById(R.id.sad_img);
+    retryButton = (Button) view.findViewById(R.id.retry);*/
     private onRefreshButtonListener mListener;
 
-    public NoInternetConnectionFragment() {
+    public ErrorMessageFragment() {
         // Required empty public constructor
     }
 
-    public static NoInternetConnectionFragment newInstance() {
-        NoInternetConnectionFragment fragment = new NoInternetConnectionFragment();
+    public static ErrorMessageFragment newInstance(String message) {
+        ErrorMessageFragment fragment = new ErrorMessageFragment();
         Bundle args = new Bundle();
+        args.putString(MESSAGE, message);
         fragment.setArguments(args);
         return fragment;
     }
@@ -33,6 +48,7 @@ public class NoInternetConnectionFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
+            this.message = getArguments().getString(MESSAGE);
         }
     }
 
@@ -40,13 +56,14 @@ public class NoInternetConnectionFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_no_internet_connection, container, false);
+        View view = inflater.inflate(R.layout.fragment_error_message, container, false);
+        ButterKnife.bind(this, view);
+        return view;
     }
 
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
-        imageViewSad = (ImageView) view.findViewById(R.id.sad_img);
-        retryButton = (Button) view.findViewById(R.id.retry);
+
         Picasso.with(getContext()).load(R.drawable.ic_android_sad).centerCrop().fit().into(imageViewSad);
          retryButton.setOnClickListener(new View.OnClickListener() {
              @Override
@@ -54,6 +71,7 @@ public class NoInternetConnectionFragment extends Fragment {
                  onButtonPressed();
              }
          });
+        errorTextView.setText(message);
     }
 
     public void onButtonPressed() {

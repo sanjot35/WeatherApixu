@@ -1,5 +1,9 @@
 package com.opensooq.weatherapp.common;
 
+import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -19,7 +23,13 @@ public class Util {
             e.printStackTrace();
         }
         DateFormat format2 = new SimpleDateFormat("EEEE", Locale.getDefault());
-        String finalDay=format2.format(dt1);
-        return finalDay;
+        return format2.format(dt1);
+    }
+
+    public static boolean isNetworkAvailable(Context context) {
+        ConnectivityManager connectivityManager
+                = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+        return activeNetworkInfo != null && activeNetworkInfo.isConnected();
     }
 }

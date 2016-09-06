@@ -4,4 +4,11 @@
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="today">today</string>
+    <string name="amman">Amman</string>
+    <string name="new_york">new york</string>
+    <string name="barcelona">barcelona</string>
+    <string name="check_your_internet_connection">check your internet connection please!</string>
+    <string name="retry">retry</string>
+    <string name="server_down">the servers may down please try  later</string>
+    <string name="something_wrong">something wrong happen please try again</string>
 </resources>

@@ -2,6 +2,7 @@ package com.opensooq.weatherapp;
 
 import android.content.Context;
 import android.graphics.Color;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
@@ -16,76 +17,66 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.opensooq.weatherapp.adapter.WeatherAdapter;
-import com.opensooq.weatherapp.common.Const;
 import com.opensooq.weatherapp.common.Util;
-import com.opensooq.weatherapp.model.Day;
 import com.opensooq.weatherapp.model.Weather;
 import com.squareup.picasso.Picasso;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
 
-public class WeatherFragment extends Fragment {
+public class WeatherFragment extends Fragment implements WeatherTask.MyAsyncTaskListener {
     private static final String WEATHER = "weather";
-    private static final String TYPE = "type";
-    private static final String POSITION = " position";
-    private static final String COUNTRY_NAME="country";
-
-
-    private Weather weather;
-    private int mType;
-    private int mPosition;
-    private ImageView bg, icCondition;
-    private RecyclerView recyclerView;
-    private WeatherAdapter adapter;
-    private TextView conditionTxt, dateTxt, MaxTemp, MinTemp,countryName;
-    private Day  selectedDay;
+    private static final String COUNTRY_NAME = "country";
+    @BindView(R.id.bg_img)
+    ImageView cardBackground;
+    @BindView(R.id.condition_ic)
+    ImageView conditionIcon;
+    @BindView(R.id.recycler)
+    RecyclerView recyclerView;
+    @BindView(R.id.condition_txt)
+    TextView conditionTxt;
+    @BindView(R.id.date)
+    TextView dateTxt;
+    @BindView(R.id.max_temp)
+    TextView maxTempTxt;
+    @BindView(R.id.min_temp)
+    TextView minTempTxt;
+    @BindView(R.id.countryName)
+    TextView countryNameTxt;
+    @BindView(R.id.refresh)
+    FloatingActionButton refreshButton;
     private String cityName;
     private OnItemClickedListener mListener;
-    private FloatingActionButton refreshButton;
+    private Weather weather;
+    private WeatherAdapter adapter;
+    private WeatherTask task;
 
+    /*  cardBackground = (ImageView) view.findViewById(R.id.bg_img);
+    conditionIcon = (ImageView) view.findViewById(R.id.condition_ic);
+    dateTxt = (TextView) view.findViewById(R.id.date);
+    maxTempTxt = (TextView) view.findViewById(R.id.max_temp);
+    minTempTxt = (TextView) view.findViewById(R.id.min_temp);
+    conditionTxt = (TextView) view.findViewById(R.id.condition_txt);
+    countryNameTxt = (TextView) view.findViewById(R.id.countryNameTxt);
+    refreshButton = (FloatingActionButton) view.findViewById(R.id.refresh);
+*/
     public WeatherFragment() {
         // Required empty public constructor
     }
 
-    public static WeatherFragment newInstance(Weather weather, int type, int i, String cityName) {
+    public static WeatherFragment newInstance(String cityName) {
         WeatherFragment fragment = new WeatherFragment();
         Bundle args = new Bundle();
-        args.putSerializable(WEATHER, weather);
-        args.putInt(TYPE, type);
-        args.putInt(POSITION, i);
         args.putString(COUNTRY_NAME, cityName);
         fragment.setArguments(args);
         return fragment;
-    }
-
-    public int getType() {
-        return mType;
-    }
-
-    public void setType(int mType) {
-        this.mType = mType;
-    }
-
-    public Day getSelectedDay() {
-        return selectedDay;
-    }
-
-    public void setSelectedDay(Day selectedDay) {
-        this.selectedDay = selectedDay;
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            weather = (Weather) getArguments().getSerializable(WEATHER);
-            mType = getArguments().getInt(TYPE);
-            mPosition = getArguments().getInt(POSITION);
-    cityName = getArguments().getString(COUNTRY_NAME);
-            if (weather != null) {
-                Log.e("see", weather.getForecast().getForecastDay().get(1).getDate());
-            } else {
-                Log.e("weather is ", weather + "");
-            }
+            cityName = getArguments().getString(COUNTRY_NAME);
         }
     }
 
@@ -93,73 +84,83 @@ public class WeatherFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_weather, container, false);
+        View view = inflater.inflate(R.layout.fragment_weather, container, false);
+        ButterKnife.bind(this, view);
+        if (savedInstanceState != null) {
+            weather = savedInstanceState.getParcelable(WEATHER);
+        }
+        if (weather == null)
+            startWeatherTask();
+        else {
+            fetchList();
+            fetchDataCard();
+        }
+        return view;
+    }
+
+    public void fetchDataCard() {
+        String conditionStr;
+        conditionStr = weather.getCurrent().getCondition().getConditionText();
+        if (conditionStr.toLowerCase().contains("cloudy") || conditionStr.toLowerCase().contains("cloud"))
+            Picasso.with(getActivity()).load(R.drawable.bg_cloudy).fit().centerCrop().into(cardBackground);
+        else if (conditionStr.toLowerCase().contains("rainy") || conditionStr.toLowerCase().contains("rain"))
+            Picasso.with(getContext()).load(R.drawable.bg_rainy).fit().centerCrop().into(cardBackground);
+        else
+            Picasso.with(getContext()).load(R.drawable.bg_sunny).fit().centerCrop().into(cardBackground);
+        Picasso.with(getContext()).load("http://".concat(weather.getCurrent().getCondition().getIconLink().substring(2, weather.getCurrent().getCondition().getIconLink().length()))).into(conditionIcon);
+        dateTxt.setText(R.string.today);
+        conditionTxt.setText(weather.getCurrent().getCondition().getConditionText());
+        maxTempTxt.setText(String.format("%s°", weather.getForecast().getForecastDay().get(0).getDay().getMaxtempC()));
+        minTempTxt.setText(String.format("%s°", weather.getForecast().getForecastDay().get(0).getDay().getMintempC()));
+
+
+    }
+
+    public void fetchList() {
+        if (adapter == null) {
+            adapter = new WeatherAdapter(weather.getForecast());
+            recyclerView.setAdapter(adapter);
+            recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+            adapter.setOnItemClickListener(new WeatherAdapter.OnItemClickListener() {
+                @Override
+                public void onItemClick(View itemView, int position) {
+                    onItemClicked(position);
+
+                }
+            });
+        } else {
+            adapter.setForecast(weather.getForecast());
+            adapter.notifyDataSetChanged();
+        }
+
     }
 
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
-        bg = (ImageView) view.findViewById(R.id.bg_img);
-        icCondition = (ImageView) view.findViewById(R.id.condition_ic);
-        dateTxt = (TextView) view.findViewById(R.id.date);
-        MaxTemp = (TextView) view.findViewById(R.id.max_temp);
-        MinTemp = (TextView) view.findViewById(R.id.min_temp);
-        conditionTxt = (TextView) view.findViewById(R.id.condition_txt);
-        countryName = (TextView) view.findViewById(R.id.countryName);
-        refreshButton = (FloatingActionButton) view.findViewById(R.id.refresh);
-        if(mType!=Const.DAILY)
-            refreshButton.setVisibility(View.GONE);
         refreshButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                mListener.onRefreshAnchorButton();
+                startWeatherTask();
             }
         });
-        countryName.setText(cityName);
-        String conditionstr = null;
-        if (mType == Const.DAILY)
-            conditionstr = weather.getCurrent().getCondition().getConditionText();
-        else {
-            setSelectedDay(weather.getForecast().getForecastDay().get(mPosition).getDay());
-            conditionstr = getSelectedDay().getCondition().getConditionText();
-        }
-        if (conditionstr.toLowerCase().contains("cloudy")||conditionstr.toLowerCase().contains("cloud"))
-            Picasso.with(getActivity()).load(R.drawable.bg_cloudy).fit().centerCrop().into(bg);
-        else if (conditionstr.toLowerCase().contains("rainy")||conditionstr.toLowerCase().contains("rain"))
-            Picasso.with(getContext()).load(R.drawable.bg_rainy).fit().centerCrop().into(bg);
-        else Picasso.with(getContext()).load(R.drawable.bg_sunny).fit().centerCrop().into(bg);
-        recyclerView = (RecyclerView) view.findViewById(R.id.recycler);
+        countryNameTxt.setText(cityName);
         recyclerView.setBackgroundColor(Color.parseColor("#303F9F"));
-        if (mType == Const.DAILY)
-            adapter = new WeatherAdapter(weather.getForecast(), Const.DAILY, 0);
-        else
-            adapter = new WeatherAdapter(weather.getForecast(), Const.HOURLY, mPosition);
-        recyclerView.setAdapter(adapter);
-        recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-        adapter.setOnItemClickListener(new WeatherAdapter.OnItemClickListener() {
-            @Override
-            public void onItemClick(View itemView, int position) {
-                if (mType == Const.DAILY)
-                    onItemClicked(position);
-
-            }
-        });
-        if (mType == Const.DAILY) {
-            Picasso.with(getContext()).load("http://".concat(weather.getCurrent().getCondition().getIconLink().substring(2, weather.getCurrent().getCondition().getIconLink().length()))).into(icCondition);
-            dateTxt.setText(R.string.today);
-            conditionTxt.setText(weather.getCurrent().getCondition().getConditionText());
-            MaxTemp.setText(String.format("%s°", weather.getForecast().getForecastDay().get(0).getDay().getMaxtempC()));
-            MinTemp.setText(String.format("%s°", weather.getForecast().getForecastDay().get(0).getDay().getMintempC()));
-        } else {
-            Picasso.with(getContext()).load("http://".concat(getSelectedDay().getCondition().getIconLink().substring(2, getSelectedDay().getCondition().getIconLink().length()))).into(icCondition);
-            dateTxt.setText(String.format("%s", Util.ConvertDateToDay(weather.getForecast().getForecastDay().get(mPosition).getDate())));
-            conditionTxt.setText(getSelectedDay().getCondition().getConditionText());
-            MaxTemp.setText(String.format("%s°", getSelectedDay().getMaxtempC()));
-            MinTemp.setText(String.format("%s°", getSelectedDay().getMintempC()));
-        }
 
     }
 
-    // TODO: Rename method, update argument and hook method into UI event
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        outState.putParcelable(WEATHER, weather);
+        super.onSaveInstanceState(outState);
+
+    }
+
+    public void startWeatherTask() {
+        task = new WeatherTask();
+        task.setListener(this);
+        task.execute(cityName);
+    }
+
     public void onItemClicked(int pos) {
         if (mListener != null) {
             mListener.showDetails(pos);
@@ -178,15 +179,75 @@ public class WeatherFragment extends Fragment {
     }
 
     @Override
+    public void onPreExecuteConcluded() {
+        Log.e("onPreExecuteConcluded", "Hi!");
+        ((MainActivity) getActivity()).progressBar.setVisibility(View.VISIBLE);
+        ((MainActivity) getActivity()).container.setVisibility(View.INVISIBLE);
+    }
+
+    @Override
+    public void onPostExecuteConcluded(Weather result, boolean isSuccessful) {
+        this.weather = result;
+        Log.e("onPostExecuteConcluded", "Hi!");
+
+        /*
+        to make the code more readable , I separate the ui into two methods
+
+
+
+        */
+        LoadDate(weather, isSuccessful);
+        /*
+        if(weather==nu)
+          fetchDataCard();
+        fetchList();
+        ((MainActivity)getActivity()).progressBar.setVisibility(View.INVISIBLE);
+        ((MainActivity)getActivity()).container.setVisibility(View.VISIBLE);
+   */
+    }
+
+    private void LoadDate(Weather weather, boolean isSuccessful) {
+        ((MainActivity) getActivity()).progressBar.setVisibility(View.INVISIBLE);
+        ((MainActivity) getActivity()).container.setVisibility(View.VISIBLE);
+        if (isSuccessful) {
+            if (weather.getCurrent() != null) {
+                fetchDataCard();
+                fetchList();
+            } else {
+                loadErrorMessage(getString(R.string.something_wrong));
+            }
+        } else {
+            if (Util.isNetworkAvailable(getContext()))
+                loadErrorMessage(getString(R.string.server_down));
+            else {
+                loadErrorMessage(getString(R.string.check_your_internet_connection));
+
+            }
+        }
+
+    }
+
+    public void loadErrorMessage(String message) {
+        getActivity().getSupportFragmentManager().beginTransaction().replace(R.id.fragmentContainer, ErrorMessageFragment.newInstance(message)).commit();
+    }
+
+    @Override
     public void onDetach() {
         super.onDetach();
         mListener = null;
     }
 
+    @Override
+    public void onPause() {
+        super.onPause();
+        if (task != null && task.getStatus() == AsyncTask.Status.RUNNING)
+            task.cancel(true);
+    }
+
     public interface OnItemClickedListener {
         // TODO: Update argument type and name
         void showDetails(int pos);
+
         void onRefreshAnchorButton();
     }
-
 }

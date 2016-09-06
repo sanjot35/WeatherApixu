@@ -1,10 +1,10 @@
 package com.opensooq.weatherapp.Activities;
 
 import android.content.DialogInterface;
-import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -24,7 +24,7 @@ import com.opensooq.weatherapp.R;
 import com.opensooq.weatherapp.api.ApiClient;
 import com.opensooq.weatherapp.api.ApiInterface;
 import com.opensooq.weatherapp.common.Const;
-import com.opensooq.weatherapp.common.Pref;
+import com.opensooq.weatherapp.common.PreferencesManager;
 import com.opensooq.weatherapp.model.Weather;
 
 import java.io.IOException;
@@ -35,11 +35,11 @@ import retrofit2.Response;
 
 public class CityListActivity extends AppCompatActivity {
     private ListView listView;
-    private ArrayAdapter adapter;
+    private ArrayAdapter<String> adapter;
     private int currentSelection;
     private ApiInterface apiService;
     private Weather weather;
-    private Pref tinySharedPreferences;
+    private PreferencesManager preferencesManager;
     private FloatingActionButton floatingActionButton;
     private ProgressBar progressBar;
     private TextView jokeMessage;
@@ -47,14 +47,15 @@ public class CityListActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_city_list);
-        tinySharedPreferences = new Pref();
+        preferencesManager = PreferencesManager.getInstance(this);
         apiService = ApiClient.getClient().create(ApiInterface.class);
+        ActionBar ab = getSupportActionBar();
+        if (ab != null)
         getSupportActionBar().setHomeButtonEnabled(true);
         listView = (ListView) findViewById(R.id.list_cities);
         floatingActionButton = (FloatingActionButton) findViewById(R.id.fab);
         progressBar = (ProgressBar) findViewById(R.id.prog);
         jokeMessage= (TextView) findViewById(R.id.joke_txt);
-        final String PREFS_NAME = "MyPrefsFile";
         final ActionMode.Callback modeCallBack = new ActionMode.Callback() {
 
             public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
@@ -76,9 +77,8 @@ public class CityListActivity extends AppCompatActivity {
                 int id = item.getItemId();
                 switch (id) {
                     case R.id.delete: {
-
-                        tinySharedPreferences.removeFavorite(getApplicationContext(), listView.getItemAtPosition(currentSelection).toString());
-                        adapter.remove(adapter.getItem(currentSelection));
+                        preferencesManager.removeItem(listView.getItemAtPosition(currentSelection).toString());
+                        adapter.notifyDataSetChanged();
                         mode.finish();
                         return true;
 
@@ -90,24 +90,20 @@ public class CityListActivity extends AppCompatActivity {
                 }
             }
         };
-
-        SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
-
-
-        if (settings.getBoolean("my_first_time", true)) {
+        if (preferencesManager.isFirstTime()) {
             //the app is being launched for first time, do something
-            tinySharedPreferences.addFavorite(this, "Amman");
-            tinySharedPreferences.addFavorite(this, "new york");
-            tinySharedPreferences.addFavorite(this, "barcelona");
+            preferencesManager.addItem(getString(R.string.amman));
+            preferencesManager.addItem(getString(R.string.new_york));
+            preferencesManager.addItem(getString(R.string.barcelona));
             // record the fact that the app has been started at least once
-            settings.edit().putBoolean("my_first_time", false).apply();
+            preferencesManager.setFirstTime(false);
         }
-        adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, tinySharedPreferences.loadFavorites(this));
+        adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, preferencesManager.loadList());
         listView.setAdapter(adapter);
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                tinySharedPreferences.storeLastSelected(getApplicationContext(),listView.getItemAtPosition(i).toString());
+                preferencesManager.storeLastSelectedCity(listView.getItemAtPosition(i).toString());
                 finish();
             }
         });
@@ -186,9 +182,9 @@ floatingActionButton.setOnClickListener(new View.OnClickListener() {
             }
             else {
                 Toast.makeText(CityListActivity.this," Successfully Added!",Toast.LENGTH_LONG).show();
-                tinySharedPreferences.addFavorite(CityListActivity.this,cityName);
-                adapter.clear();
-                adapter.addAll(tinySharedPreferences.loadFavorites(CityListActivity.this));
+                preferencesManager.addItem(cityName);
+                // adapter.clear();
+
                 adapter.notifyDataSetChanged();
             }
         }
