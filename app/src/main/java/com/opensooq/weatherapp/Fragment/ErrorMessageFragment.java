@@ -1,4 +1,4 @@
-package com.opensooq.weatherapp;
+package com.opensooq.weatherapp.Fragment;
 
 import android.content.Context;
 import android.os.Bundle;
@@ -11,6 +11,7 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.opensooq.weatherapp.R;
 import com.squareup.picasso.Picasso;
 
 import butterknife.BindView;

@@ -8,30 +8,41 @@ import com.google.gson.annotations.SerializedName;
 /**
  * Created by Omar AlTamimi on 9/1/2016.
  */
-public class Weather implements Parcelable {
+public class WeatherResponse implements Parcelable {
 
-    public static final Parcelable.Creator<Weather> CREATOR = new Parcelable.Creator<Weather>() {
+    public static final Creator<WeatherResponse> CREATOR = new Creator<WeatherResponse>() {
         @Override
-        public Weather createFromParcel(Parcel source) {
-            return new Weather(source);
+        public WeatherResponse createFromParcel(Parcel source) {
+            return new WeatherResponse(source);
         }
 
         @Override
-        public Weather[] newArray(int size) {
-            return new Weather[size];
+        public WeatherResponse[] newArray(int size) {
+            return new WeatherResponse[size];
         }
     };
     @SerializedName("current")
     private Current current;
     @SerializedName("forecast")
     private Forecast forecast;
+    @SerializedName("error")
+    private Error error;
 
-    public Weather() {
+    public WeatherResponse() {
     }
 
-    protected Weather(Parcel in) {
+    protected WeatherResponse(Parcel in) {
         this.current = in.readParcelable(Current.class.getClassLoader());
         this.forecast = in.readParcelable(Forecast.class.getClassLoader());
+        this.error = in.readParcelable(Error.class.getClassLoader());
+    }
+
+    public Error getError() {
+        return error;
+    }
+
+    public void setError(Error error) {
+        this.error = error;
     }
 
     public Current getCurrent() {
@@ -59,5 +70,6 @@ public class Weather implements Parcelable {
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeParcelable(this.current, flags);
         dest.writeParcelable(this.forecast, flags);
+        dest.writeParcelable(this.error, flags);
     }
 }

@@ -4,6 +4,8 @@ import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 
+import com.opensooq.weatherapp.R;
+
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -31,5 +33,14 @@ public class Util {
                 = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
         return activeNetworkInfo != null && activeNetworkInfo.isConnected();
+    }
+
+    public static int weatherConditionBackground(String condition) {
+        if (condition.contains("cloudy") || condition.contains("cloud"))
+            return R.drawable.bg_cloudy;
+        else if (condition.contains("rainy") || condition.contains("rain"))
+            return R.drawable.bg_rainy;
+        else
+            return R.drawable.bg_sunny;
     }
 }

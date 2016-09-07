@@ -13,12 +13,15 @@ import com.opensooq.weatherapp.model.Forecast;
 import com.opensooq.weatherapp.model.ForecastDay;
 import com.squareup.picasso.Picasso;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
 /**
  * Created by Omar AlTamimi on 9/1/2016.
  */
 public class WeatherAdapter extends RecyclerView.Adapter<WeatherAdapter.WeatherHolder> {
-    private static OnItemClickListener listener;
     public Forecast mForecast;
+    private OnItemClickListener listener;
 
     public WeatherAdapter(Forecast forecast) {
         this.mForecast = forecast;
@@ -36,7 +39,7 @@ public class WeatherAdapter extends RecyclerView.Adapter<WeatherAdapter.WeatherH
     public WeatherHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         LayoutInflater inflater = LayoutInflater.from(parent.getContext());
         // Inflate the custom layout
-        View contactView = inflater.inflate(R.layout.item_forcast, parent, false);
+        View contactView = inflater.inflate(R.layout.item_forcast_days, parent, false);
         // Return a new holder instance
         return new WeatherHolder(contactView);
     }
@@ -53,7 +56,7 @@ public class WeatherAdapter extends RecyclerView.Adapter<WeatherAdapter.WeatherH
 
     // Define the method that allows the parent activity or fragment to define the listener
     public void setOnItemClickListener(OnItemClickListener listener) {
-        WeatherAdapter.listener = listener;
+        this.listener = listener;
     }
 
     // Define the listener interface
@@ -61,11 +64,19 @@ public class WeatherAdapter extends RecyclerView.Adapter<WeatherAdapter.WeatherH
         void onItemClick(View itemView, int position);
     }
 
-    public static class WeatherHolder extends RecyclerView.ViewHolder {
+    public class WeatherHolder extends RecyclerView.ViewHolder {
 
         ForecastDay forecastDay;
-        private ImageView conditionIcon;
-        private TextView dateItem, conditionItem, maxTempItem, minTempItem;
+        @BindView(R.id.ic_condition_item)
+        ImageView conditionIcon;
+        @BindView(R.id.date_item)
+        TextView dateItem;
+        @BindView(R.id.condition_item_txt)
+        TextView conditionItem;
+        @BindView(R.id.max_temp_item)
+        TextView maxTempItem;
+        @BindView(R.id.min_temp_item)
+        TextView minTempItem;
         // Your holder should contain a member variable
         // for any view that will be set as you render a row
         // We also create a constructor that accepts the entire item row
@@ -75,11 +86,7 @@ public class WeatherAdapter extends RecyclerView.Adapter<WeatherAdapter.WeatherH
             // Stores the itemView in a public final member variable that can be used
             // to access the context from any ViewHolder instance.
             super(itemView);
-            conditionIcon = (ImageView) itemView.findViewById(R.id.ic_condition_item);
-            dateItem = (TextView) itemView.findViewById(R.id.date_item);
-            conditionItem = (TextView) itemView.findViewById(R.id.condition_item_txt);
-            maxTempItem = (TextView) itemView.findViewById(R.id.max_temp_item);
-            minTempItem = (TextView) itemView.findViewById(R.id.min_temp_item);
+            ButterKnife.bind(this, itemView);
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -95,8 +102,8 @@ public class WeatherAdapter extends RecyclerView.Adapter<WeatherAdapter.WeatherH
             Picasso.with(itemView.getContext()).load("http://".concat(forecastDay.getDay().getCondition().getIconLink().substring(2, forecastDay.getDay().getCondition().getIconLink().length()))).fit().centerCrop().into(conditionIcon);
             dateItem.setText(Util.ConvertDateToDay(forecastDay.getDate()));
             conditionItem.setText(forecastDay.getDay().getCondition().getConditionText());
-            maxTempItem.setText(String.format("%s °", forecastDay.getDay().getMaxtempC()));
-            minTempItem.setText(String.format("%s °", forecastDay.getDay().getMintempC()));
+            maxTempItem.setText(String.format("%s°", forecastDay.getDay().getMaxtempC()));
+            minTempItem.setText(String.format("%s°", forecastDay.getDay().getMintempC()));
 
         }
     }

@@ -1,0 +1,26 @@
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true">
+
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                  xmlns:tools="http://schemas.android.com/tools"
+                  android:layout_width="match_parent"
+                  android:layout_height="match_parent"
+                  android:orientation="vertical"
+                  tools:context=".Fragment.WeatherDetailsFragment">
+
+        <include layout="@layout/day_card_info"
+
+            />
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/hourly_list"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="#303F9F"/>
+
+
+    </LinearLayout>
+</ScrollView>
